@@ -8,23 +8,73 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        /* 新增：讓卡片變成可以點擊的樣子 */
+        .story-card img, .story-card h4 {
+            cursor: pointer;
+        }
+        /* 閱讀故事的視窗樣式 */
+        .story-detail-content {
+            white-space: pre-wrap;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #333;
+            line-height: 1.8;
+            border-left: 4px solid #FF6600;
+        }
+        /* 獎勵列表樣式 */
+        .reward-item {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .reward-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            width: 50px;
+            text-align: center;
+        }
+        .reward-info h4 {
+            margin: 0;
+            color: #FF6600;
+            font-size: 1.2rem;
+        }
+        .reward-info p {
+            margin: 5px 0 0;
+            color: #555;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
+
+    <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; color:white; text-align:center; padding-top:20%;">
+        <h2>🚀 處理照片中...</h2>
+        <p>正在壓縮並上傳，請稍候！</p>
+    </div>
 
     <header class="navbar">
         <div class="logo">蝦皮 Shopee</div>
         <nav>
             <a href="#rules">活動玩法</a>
             <a href="#wall">故事牆</a>
-            <a href="#" onclick="openModal(); return false;">分享故事</a> 
-            <a href="#rewards">本週獎勵</a>
+            <a href="#" onclick="openModal('submission-modal'); return false;">分享故事</a> 
+            <a href="#" onclick="openModal('rewards-modal'); return false;">本週獎勵</a>
         </nav>
     </header>
 
     <section class="hero-section">
         <h1>買家故事週：買豹！</h1>
         <h2>讓你的真實故事，串起買家之間的共鳴與信任。</h2>
-        <a href="#" class="cta-button" onclick="openModal(); return false;">立即分享我的故事 →</a>
+        <a href="#" class="cta-button" onclick="openModal('submission-modal'); return false;">立即分享我的故事 →</a>
     </section>
 
     <section id="rules" class="rules-section">
@@ -48,16 +98,17 @@
 
     <section id="wall" class="story-wall">
         <h3>⭐️ 買家故事牆：本週人氣精選</h3>
-        <p style="color: #FF6600; font-weight: bold; margin-bottom: 20px;">🔥 即時戰況 Live</p>
-        <div class="story-grid" id="story-container">
-            </div>
+        <p style="color: #FF6600; font-weight: bold; margin-bottom: 20px;">🔥 點擊卡片可閱讀完整故事！</p>
+        
+        <div class="story-grid" id="story-container"></div>
+        
         <a href="#" class="view-all">查看更多故事 →</a>
     </section>
 
     <section id="submit" class="cta-section">
         <h3>想被看見？立即成為故事主角！</h3>
         <p>你的分享，將為千萬買家帶來信心與共鳴。還有機會獲得高額蝦幣與專屬曝光！</p>
-        <a href="#" class="submit-button" onclick="openModal(); return false;">前往蝦皮 App 投稿</a>
+        <a href="#" class="submit-button" onclick="openModal('submission-modal'); return false;">前往蝦皮 App 投稿</a>
     </section>
 
     <footer class="footer">
@@ -66,62 +117,107 @@
 
     <div id="submission-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal()">&times;</span>
+            <span class="close-button" onclick="closeModal('submission-modal')">&times;</span>
             <h3>分享你的 #MyshopeeStory</h3>
             <p>讓我們一起用故事影響下一個買家！</p>
             
             <form id="story-form">
                 <div class="form-group">
-                    <label for="story-title">故事標題 (如：【實用】租屋族必備！)</label>
-                    <input type="text" id="story-title" required maxlength="30" value="【推薦】這款改造神器太強了！">
+                    <label for="story-title">故事標題</label>
+                    <input type="text" id="story-title" required maxlength="30" placeholder="例如：【實用】租屋族必備！">
                 </div>
                 <div class="form-group">
                     <label for="story-author">你的暱稱</label>
-                    <input type="text" id="story-author" required maxlength="15" value="蝦皮愛用者小明">
-                </div>
-                <div class="form-group">
-                    <label for="product-link">⭐ 商品連結網址</label>
-                    <input type="url" id="product-link" value="https://shopee.tw/product-demo" required>
+                    <input type="text" id="story-author" required maxlength="15" placeholder="例如：蝦皮小明">
                 </div>
                 
                 <div class="form-group">
-                    <label>照片/影片預覽</label>
-                    <div style="margin-bottom: 10px; border: 2px dashed #ff6600; border-radius: 8px; padding: 5px; background: #fff5f0;">
-                        <img id="preview-img" src="A1.jpg" 
-                             alt="預覽圖" 
-                             style="width: 100%; height: auto; border-radius: 4px; display: block;">
-                    </div>
-                    <label for="story-media" style="font-size: 0.9rem; color: #666;">更換照片 (選填)：</label>
-                    <input type="file" id="story-media" accept="image/*,video/*">
+                    <label>上傳照片 (必填)</label>
+                    <input type="file" id="story-media" accept="image/*" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="story-text">你的故事內文</label>
-                    <textarea id="story-text" rows="4" required>原本租屋處的牆壁很舊，貼上這個壁紙後整個煥然一新，每天回家心情都超好！大推！</textarea>
+                    <textarea id="story-text" rows="5" required placeholder="請寫下你與商品的故事... 例如：原本以為這個很難用，結果一試成主顧！"></textarea>
                 </div>
                 
-                <button type="submit" class="submit-story-btn">投稿並發佈</button>
+                <button type="submit" class="submit-story-btn">確認投稿</button>
             </form>
-            <p class="note">注意：為求演示效果，投稿將暫時存於本地，重新整理後消失。</p>
+        </div>
+    </div>
+
+    <div id="view-story-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('view-story-modal')">&times;</span>
+            
+            <img id="view-img" src="" style="width:100%; max-height:400px; object-fit:contain; border-radius:8px; margin-bottom:15px;">
+            <h3 id="view-title" style="color:#FF6600; font-size:1.5rem;"></h3>
+            <p id="view-author" style="color:#999; font-size:0.9rem; margin-bottom:10px;"></p>
+            <div id="view-content" class="story-detail-content"></div>
+
+            <div style="text-align:center; margin-top:20px;">
+                <button class="cta-button" onclick="closeModal('view-story-modal')">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rewards-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('rewards-modal')">&times;</span>
+            <h3 style="text-align:center; color:#FF6600; margin-bottom:20px;">🏆 本週豪華獎勵一覽</h3>
+            
+            <div class="reward-item" style="border-left: 5px solid #FFD700;">
+                <div class="reward-icon">👑</div>
+                <div class="reward-info">
+                    <h4>金獎：年度故事王 (1名)</h4>
+                    <p>獨得 <strong>$10,000 蝦幣</strong> + 官方認證「蝦皮故事大使」榮譽徽章。</p>
+                </div>
+            </div>
+
+            <div class="reward-item" style="border-left: 5px solid #C0C0C0;">
+                <div class="reward-icon">🥈</div>
+                <div class="reward-info">
+                    <h4>銀獎：超人氣獎 (3名)</h4>
+                    <p>獲得 <strong>$5,000 蝦幣</strong> + 全站 $299 免運券 x 10 張。</p>
+                </div>
+            </div>
+
+            <div class="reward-item" style="border-left: 5px solid #CD7F32;">
+                <div class="reward-icon">🥉</div>
+                <div class="reward-info">
+                    <h4>銅獎：最佳創意獎 (5名)</h4>
+                    <p>獲得 <strong>$2,000 蝦幣</strong> + 指定品牌 5 折神券。</p>
+                </div>
+            </div>
+
+            <div class="reward-item" style="border-left: 5px solid #FF6600; background-color: #FFF5F0;">
+                <div class="reward-icon">🎁</div>
+                <div class="reward-info">
+                    <h4>參加賞：人人有獎</h4>
+                    <p>凡投稿且審核通過者，通通送 <strong>$50 蝦皮折價券</strong>！</p>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:20px;">
+                <button class="cta-button" onclick="closeModal('rewards-modal')">知道了，我要投稿！</button>
+            </div>
         </div>
     </div>
     
     <script>
         // ==========================================
-        //  2. 設定 Firebase (請在此處貼上你的 Config)
+        //  設定 Firebase Config (已填入你的金鑰)
         // ==========================================
-        
-        // 🚨 請刪除下方的註解範例，貼上你在 Firebase Console 複製的那一大段程式碼
         const firebaseConfig = {
-  apiKey: "AIzaSyA3V2vuHLxLwmtJSzYqUbiy-fhOsGpu8xE",
-  authDomain: "shopeestory-9671d.firebaseapp.com",
-  databaseURL: "https://shopeestory-9671d-default-rtdb.firebaseio.com",
-  projectId: "shopeestory-9671d",
-  storageBucket: "shopeestory-9671d.firebasestorage.app",
-  messagingSenderId: "1052137917692",
-  appId: "1:1052137917692:web:7c42f5b181d44595749b79",
-  measurementId: "G-YXN4DKLDGN"
-};
+            apiKey: "AIzaSyA3V2vuHLxLwmtJSzYqUbiy-fhOsGpu8xE",
+            authDomain: "shopeestory-9671d.firebaseapp.com",
+            databaseURL: "https://shopeestory-9671d-default-rtdb.firebaseio.com",
+            projectId: "shopeestory-9671d",
+            storageBucket: "shopeestory-9671d.firebasestorage.app",
+            messagingSenderId: "1052137917692",
+            appId: "1:1052137917692:web:7c42f5b181d44595749b79",
+            measurementId: "G-YXN4DKLDGN"
+        };
 
         // 初始化 Firebase
         if (!firebase.apps.length) {
@@ -130,132 +226,222 @@
         const db = firebase.database();
 
         // ==========================================
-        //  3. 故事基礎資料 (靜態部分)
+        //  官方故事資料
         // ==========================================
-        // 這些資料是固定的，但票數會從 Firebase 抓取
-        const storiesStaticData = [ 
-            { id: 1, title: "【爆笑】我的懶人沙發歷險記", author: "買到睡著的Yiling", imageUrl: "A1.jpg", productLink: "#" },
-            { id: 2, title: "【感人】為媽媽換上的溫暖檯燈", author: "孝順小幫手Gary", imageUrl: "A2.jpg", productLink: "#" },
-            { id: 3, title: "【實用】租屋族必備！收納層架", author: "空間魔術師Anna", imageUrl: "A3.jpg", productLink: "#" },
-            { id: 4, title: "從此告別塵蟎！除濕機開箱", author: "過敏兒救星Kevin", imageUrl: "A4.jpg", productLink: "#" },
-            { id: 5, title: "一秒變網美！高CP值打光燈", author: "自拍女王Dora", imageUrl: "A5.jpg", productLink: "#" },
-            { id: 6, title: "貓奴必看！讓主子瘋狂的玩具", author: "貓掌櫃Leo", imageUrl: "A6.jpg", productLink: "#" },
-            { id: 7, title: "異星機械鍵盤！帥到沒朋友", author: "電競阿豪", imageUrl: "A7.jpg", productLink: "#" } 
+        const officialStories = [ 
+            { 
+                id: "static-1", 
+                title: "【爆笑】我的懶人沙發歷險記", 
+                author: "買到睡著的Yiling", 
+                imageUrl: "A1.jpg", 
+                votes: 0,
+                content: "原本想買來在客廳看書，結果這顆懶人沙發實在太舒服了！現在只要一坐下去，書還沒翻開就先睡著了...連我家貓咪現在都會跟我搶位子，真的太好笑了！強力推薦給想要耍廢的人！"
+            },
+            { 
+                id: "static-2", 
+                title: "【感人】為媽媽換上的溫暖檯燈", 
+                author: "孝順小幫手Gary", 
+                imageUrl: "A2.jpg", 
+                votes: 0,
+                content: "媽媽因為年紀大眼睛不好，原本的舊檯燈太暗了。我在蝦皮看到這款復古花瓣燈，不僅亮度夠，造型也很溫馨。媽媽收到後笑得很開心，現在每天晚上都在這個燈下織毛衣，感覺家裡變得更溫暖了。" 
+            },
+            { 
+                id: "static-3", 
+                title: "【實用】租屋族必備！收納層架", 
+                author: "空間魔術師Anna", 
+                imageUrl: "A3.jpg", 
+                votes: 0,
+                content: "租屋處只有三坪大，東西多到沒地方放。買了這個層架後，垂直收納空間瞬間變大！而且它是透明門板設計，找東西不用翻箱倒櫃，組裝也很簡單，女生一個人就能搞定，真的是租屋神器！" 
+            },
+            { 
+                id: "static-4", 
+                title: "從此告別塵蟎！除濕機開箱", 
+                author: "過敏兒救星Kevin", 
+                imageUrl: "A4.jpg", 
+                votes: 0,
+                content: "身為嚴重過敏兒，每到雨季就打噴嚏打不停。這台除濕機雖然小台，但吸水力超強！開了一整天倒水的時候超有成就感，房間也不再有霉味了，睡覺終於不用包水餃，大推！" 
+            },
+            { 
+                id: "static-5", 
+                title: "一秒變網美！高CP值打光燈", 
+                author: "自拍女王Dora", 
+                imageUrl: "A5.jpg", 
+                votes: 0,
+                content: "以前自拍都要找光線找半天，買了這個補光燈後，隨便拍皮膚都超好！它有三種色溫可以調，直播的時候用美顏效果也很自然。重點是價格超便宜，CP值爆表！" 
+            },
+            { 
+                id: "static-6", 
+                title: "貓奴必看！讓主子瘋狂的玩具", 
+                author: "貓掌櫃Leo", 
+                imageUrl: "A6.jpg", 
+                votes: 0,
+                content: "我家主子平常很高冷，買了無數玩具都被打入冷宮。結果這個貓抓球一拿出來，它玩到瘋掉！劍麻材質很耐抓，玩了兩個禮拜還沒壞，終於買對東西了，感動哭！" 
+            },
+            { 
+                id: "static-7", 
+                title: "異星機械鍵盤！帥到沒朋友", 
+                author: "電競阿豪", 
+                imageUrl: "A7.jpg", 
+                votes: 0,
+                content: "身為資深玩家，這把鍵盤的RGB燈光真的太帥了！打擊感清脆，回彈力道剛好，玩FPS遊戲手感提升很多。朋友來家裡看到都問在哪買的，放在桌上就是一個字：帥！" 
+            } 
         ];
 
+        let allStoriesMap = {};
+
         // ==========================================
-        //  4. 渲染頁面與即時監聽
+        //  渲染邏輯
         // ==========================================
         const container = document.getElementById('story-container');
 
-        // 首次渲染卡片 (票數先顯示「載入中...」)
-        function initRender() {
+        db.ref().on('value', (snapshot) => {
             container.innerHTML = '';
-            storiesStaticData.forEach(story => {
+            const data = snapshot.val() || {};
+            const userStories = data.user_stories || {};
+            const allVotes = data.votes || {};
+
+            let displayList = officialStories.map(story => {
+                const updatedStory = { ...story, currentVotes: (allVotes[story.id] || 0) + story.votes, isOfficial: true };
+                allStoriesMap[story.id] = updatedStory; 
+                return updatedStory;
+            });
+
+            Object.keys(userStories).forEach(key => {
+                const s = userStories[key];
+                const updatedStory = {
+                    id: key, 
+                    title: s.title,
+                    author: s.author,
+                    imageUrl: s.imageUrl,
+                    content: s.content, 
+                    currentVotes: (allVotes[key] || 0),
+                    isOfficial: false
+                };
+                allStoriesMap[key] = updatedStory; 
+                displayList.push(updatedStory);
+            });
+
+            displayList.sort((a, b) => b.currentVotes - a.currentVotes);
+
+            displayList.forEach(story => {
+                const badge = story.isOfficial ? '<span style="background:#FF6600; color:white; padding:2px 6px; border-radius:4px; font-size:0.7rem; margin-right:5px;">官方精選</span>' : '<span style="background:#00bfa5; color:white; padding:2px 6px; border-radius:4px; font-size:0.7rem; margin-right:5px;">新投稿</span>';
+                
                 const storyCardHtml = `
-                    <div class="story-card" id="card-${story.id}">
-                        <a href="${story.productLink}" target="_blank">
-                            <img src="${story.imageUrl}" alt="${story.title}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=Image'">
-                        </a>
-                        <h4>${story.title}</h4>
+                    <div class="story-card">
+                        <div style="height:200px; overflow:hidden;" onclick="openViewModal('${story.id}')">
+                             <img src="${story.imageUrl}" alt="${story.title}" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                        <h4 style="font-size:1.1rem; padding:10px 15px 5px;" onclick="openViewModal('${story.id}')">${badge}${story.title}</h4>
                         <p class="author">@${story.author}</p>
                         <div class="votes">
-                            <span class="vote-count" id="vote-text-${story.id}">載入中...</span>
-                            <button class="vote-btn" onclick="submitVote(${story.id})">投票</button>
+                            <span class="vote-count" style="color:#FF6600; font-weight:bold;">${story.currentVotes.toLocaleString()} 票</span>
+                            <button class="vote-btn" onclick="submitVote('${story.id}')">投票</button>
                         </div>
                     </div>
                 `;
                 container.innerHTML += storyCardHtml;
             });
-        }
-
-        // 監聽 Firebase 資料庫變動 (這是實現 Real-time 的核心！)
-        // 只要資料庫有變動，這裡就會收到通知，不用重新整理網頁
-        db.ref('votes').on('value', (snapshot) => {
-            const votesData = snapshot.val() || {}; // 獲取所有票數資料
-
-            // 更新每一個故事的票數顯示
-            storiesStaticData.forEach(story => {
-                const count = votesData[story.id] || 0; // 如果沒資料就預設為 0
-                const voteElement = document.getElementById(`vote-text-${story.id}`);
-                if (voteElement) {
-                    voteElement.innerText = `${count.toLocaleString()} 票`;
-                    // 增加一個閃爍動畫效果，讓用戶知道數字變了
-                    voteElement.style.color = "#FF0000";
-                    setTimeout(() => voteElement.style.color = "#FF6600", 300);
-                }
-            });
-
-            // (進階) 這裡可以寫邏輯讓卡片根據票數重新排序，但為了避免畫面一直跳動，暫時不加
         });
 
-        // 執行初始化渲染
-        initRender();
+        // ==========================================
+        //  功能函數區
+        // ==========================================
 
-        // ==========================================
-        //  5. 投票功能 (寫入 Firebase)
-        // ==========================================
         function submitVote(storyId) {
-            // 使用 transaction 確保多人同時點擊時票數不會算錯
             const voteRef = db.ref('votes/' + storyId);
-            
             voteRef.transaction((current_value) => {
-                return (current_value || 0) + 1; // 票數 +1
-            }, (error, committed, snapshot) => {
-                if (error) {
-                    console.error('投票失敗', error);
-                } else if (committed) {
-                    // 這裡可以加一些使用者的本地回饋，例如按鈕變色
-                    // alert('投票成功！'); // 為了流暢體驗，通常不跳alert
-                }
+                return (current_value || 0) + 1;
             });
         }
 
-        // ==========================================
-        //  6. 投稿 Modal 邏輯 (維持原樣，但加上圖片輪播)
-        // ==========================================
-        const modal = document.getElementById('submission-modal');
-        const form = document.getElementById('story-form');
-        const previewImg = document.getElementById('preview-img');
-        const demoImages = ['A1.jpg', 'A2.jpg', 'A3.jpg', 'A4.jpg', 'A5.jpg', 'A6.jpg', 'A7.jpg'];
-        let currentImgIndex = 0;
+        function openViewModal(storyId) {
+            const story = allStoriesMap[storyId];
+            if (!story) return;
 
-        function openModal() {
-            previewImg.src = demoImages[currentImgIndex];
-            currentImgIndex = (currentImgIndex + 1) % demoImages.length;
-            modal.style.display = 'block';
+            document.getElementById('view-img').src = story.imageUrl;
+            document.getElementById('view-title').innerText = story.title;
+            document.getElementById('view-author').innerText = '作者：@' + story.author;
+            document.getElementById('view-content').innerText = story.content || "這位作者很懶，只有分享照片，沒有寫下故事...";
+
+            document.getElementById('view-story-modal').style.display = 'block';
         }
 
-        function closeModal() {
-            modal.style.display = 'none';
+        // 修改：通用的開啟 Modal 函數，接收 modalId
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        // 修改：通用的關閉 Modal 函數
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
             }
         }
 
+        // ==========================================
+        //  投稿上傳邏輯
+        // ==========================================
+        const form = document.getElementById('story-form');
+        const loadingOverlay = document.getElementById('loading-overlay');
+
         form.addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            // 演示用：這裡暫時不寫入資料庫，只顯示成功
+            e.preventDefault();
+            
+            const title = document.getElementById('story-title').value.trim();
             const author = document.getElementById('story-author').value.trim();
-            alert(`恭喜 @${author}！您的故事已送出 (演示模式)！`);
-            closeModal();
-        });
+            const content = document.getElementById('story-text').value.trim(); 
+            const fileInput = document.getElementById('story-media');
+            const file = fileInput.files[0];
 
-        // 圖片預覽功能
-        document.getElementById('story-media').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if(file){
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
+            if (!file) { alert("請選擇一張照片！"); return; }
+
+            loadingOverlay.style.display = 'block';
+            closeModal('submission-modal');
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX_WIDTH = 800;
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+
+                    const newStoryRef = db.ref('user_stories').push();
+                    newStoryRef.set({
+                        title: title,
+                        author: author,
+                        content: content, 
+                        imageUrl: dataUrl,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }).then(() => {
+                        alert("🎉 投稿成功！");
+                        loadingOverlay.style.display = 'none';
+                        form.reset();
+                    }).catch((error) => {
+                        console.error(error);
+                        alert("上傳失敗，請重試");
+                        loadingOverlay.style.display = 'none';
+                    });
                 }
-                reader.readAsDataURL(file);
+                img.src = event.target.result;
             }
+            reader.readAsDataURL(file);
         });
-
     </script>
 </body>
 </html>
