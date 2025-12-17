@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買家故事週：讓你的故事影響下一個買家！</title>
+    <link rel="stylesheet" href="style.css"> 
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">蝦皮 Shopee</div>
+        <nav>
+            <a href="#rules">活動玩法</a>
+            <a href="#wall">故事牆</a>
+            <a href="#" onclick="openModal(); return false;">分享故事</a> 
+            <a href="#rewards">本週獎勵</a>
+        </nav>
+    </header>
+
+    <section class="hero-section">
+        <h1>買家故事週：買豹！</h1>
+        <h2>讓你的真實故事，串起買家之間的共鳴與信任。</h2>
+        <a href="#" class="cta-button" onclick="openModal(); return false;">立即分享我的故事 →</a>
+    </section>
+
+    <section id="rules" class="rules-section">
+        <h3>💡 本週主題：【最實用的改造好物】</h3>
+        <div class="rule-steps">
+            <div class="step">
+                <h4>STEP 1. 拍照/錄影</h4>
+                <p>上傳你的商品照片或短影音。</p>
+            </div>
+            <div class="step">
+                <h4>STEP 2. 撰寫故事 (#MyshopeeStory)</h4>
+                <p>短文描述這項商品如何讓你的生活變更好。</p>
+            </div>
+            <div class="step">
+                <h4>STEP 3. 投票決定 (週末)</h4>
+                <p>每個週末，選出最吸引你的商品故事，就有機會獲得蝦幣！</p>
+            </div>
+        </div>
+        <p class="date-info">活動時間：每週一至週五投稿；週六、週日投票。</p>
+    </section>
+
+    <section id="wall" class="story-wall">
+        <h3>⭐️ 買家故事牆：本週人氣精選</h3>
+        <p style="color: #FF6600; font-weight: bold; margin-bottom: 20px;">🔥 即時戰況 Live</p>
+        <div class="story-grid" id="story-container">
+            </div>
+        <a href="#" class="view-all">查看更多故事 →</a>
+    </section>
+
+    <section id="submit" class="cta-section">
+        <h3>想被看見？立即成為故事主角！</h3>
+        <p>你的分享，將為千萬買家帶來信心與共鳴。還有機會獲得高額蝦幣與專屬曝光！</p>
+        <a href="#" class="submit-button" onclick="openModal(); return false;">前往蝦皮 App 投稿</a>
+    </section>
+
+    <footer class="footer">
+        <p>© 蝦皮-買家故事週企劃 | 聯繫我們</p>
+    </footer>
+
+    <div id="submission-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h3>分享你的 #MyshopeeStory</h3>
+            <p>讓我們一起用故事影響下一個買家！</p>
+            
+            <form id="story-form">
+                <div class="form-group">
+                    <label for="story-title">故事標題 (如：【實用】租屋族必備！)</label>
+                    <input type="text" id="story-title" required maxlength="30" value="【推薦】這款改造神器太強了！">
+                </div>
+                <div class="form-group">
+                    <label for="story-author">你的暱稱</label>
+                    <input type="text" id="story-author" required maxlength="15" value="蝦皮愛用者小明">
+                </div>
+                <div class="form-group">
+                    <label for="product-link">⭐ 商品連結網址</label>
+                    <input type="url" id="product-link" value="https://shopee.tw/product-demo" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>照片/影片預覽</label>
+                    <div style="margin-bottom: 10px; border: 2px dashed #ff6600; border-radius: 8px; padding: 5px; background: #fff5f0;">
+                        <img id="preview-img" src="A1.jpg" 
+                             alt="預覽圖" 
+                             style="width: 100%; height: auto; border-radius: 4px; display: block;">
+                    </div>
+                    <label for="story-media" style="font-size: 0.9rem; color: #666;">更換照片 (選填)：</label>
+                    <input type="file" id="story-media" accept="image/*,video/*">
+                </div>
+                
+                <div class="form-group">
+                    <label for="story-text">你的故事內文</label>
+                    <textarea id="story-text" rows="4" required>原本租屋處的牆壁很舊，貼上這個壁紙後整個煥然一新，每天回家心情都超好！大推！</textarea>
+                </div>
+                
+                <button type="submit" class="submit-story-btn">投稿並發佈</button>
+            </form>
+            <p class="note">注意：為求演示效果，投稿將暫時存於本地，重新整理後消失。</p>
+        </div>
+    </div>
+    
+    <script>
+        // ==========================================
+        //  2. 設定 Firebase (請在此處貼上你的 Config)
+        // ==========================================
+        
+        // 🚨 請刪除下方的註解範例，貼上你在 Firebase Console 複製的那一大段程式碼
+        const firebaseConfig = {
+  apiKey: "AIzaSyA3V2vuHLxLwmtJSzYqUbiy-fhOsGpu8xE",
+  authDomain: "shopeestory-9671d.firebaseapp.com",
+  databaseURL: "https://shopeestory-9671d-default-rtdb.firebaseio.com",
+  projectId: "shopeestory-9671d",
+  storageBucket: "shopeestory-9671d.firebasestorage.app",
+  messagingSenderId: "1052137917692",
+  appId: "1:1052137917692:web:7c42f5b181d44595749b79",
+  measurementId: "G-YXN4DKLDGN"
+};
+
+        // 初始化 Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // ==========================================
+        //  3. 故事基礎資料 (靜態部分)
+        // ==========================================
+        // 這些資料是固定的，但票數會從 Firebase 抓取
+        const storiesStaticData = [ 
+            { id: 1, title: "【爆笑】我的懶人沙發歷險記", author: "買到睡著的Yiling", imageUrl: "A1.jpg", productLink: "#" },
+            { id: 2, title: "【感人】為媽媽換上的溫暖檯燈", author: "孝順小幫手Gary", imageUrl: "A2.jpg", productLink: "#" },
+            { id: 3, title: "【實用】租屋族必備！收納層架", author: "空間魔術師Anna", imageUrl: "A3.jpg", productLink: "#" },
+            { id: 4, title: "從此告別塵蟎！除濕機開箱", author: "過敏兒救星Kevin", imageUrl: "A4.jpg", productLink: "#" },
+            { id: 5, title: "一秒變網美！高CP值打光燈", author: "自拍女王Dora", imageUrl: "A5.jpg", productLink: "#" },
+            { id: 6, title: "貓奴必看！讓主子瘋狂的玩具", author: "貓掌櫃Leo", imageUrl: "A6.jpg", productLink: "#" },
+            { id: 7, title: "異星機械鍵盤！帥到沒朋友", author: "電競阿豪", imageUrl: "A7.jpg", productLink: "#" } 
+        ];
+
+        // ==========================================
+        //  4. 渲染頁面與即時監聽
+        // ==========================================
+        const container = document.getElementById('story-container');
+
+        // 首次渲染卡片 (票數先顯示「載入中...」)
+        function initRender() {
+            container.innerHTML = '';
+            storiesStaticData.forEach(story => {
+                const storyCardHtml = `
+                    <div class="story-card" id="card-${story.id}">
+                        <a href="${story.productLink}" target="_blank">
+                            <img src="${story.imageUrl}" alt="${story.title}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=Image'">
+                        </a>
+                        <h4>${story.title}</h4>
+                        <p class="author">@${story.author}</p>
+                        <div class="votes">
+                            <span class="vote-count" id="vote-text-${story.id}">載入中...</span>
+                            <button class="vote-btn" onclick="submitVote(${story.id})">投票</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += storyCardHtml;
+            });
+        }
+
+        // 監聽 Firebase 資料庫變動 (這是實現 Real-time 的核心！)
+        // 只要資料庫有變動，這裡就會收到通知，不用重新整理網頁
+        db.ref('votes').on('value', (snapshot) => {
+            const votesData = snapshot.val() || {}; // 獲取所有票數資料
+
+            // 更新每一個故事的票數顯示
+            storiesStaticData.forEach(story => {
+                const count = votesData[story.id] || 0; // 如果沒資料就預設為 0
+                const voteElement = document.getElementById(`vote-text-${story.id}`);
+                if (voteElement) {
+                    voteElement.innerText = `${count.toLocaleString()} 票`;
+                    // 增加一個閃爍動畫效果，讓用戶知道數字變了
+                    voteElement.style.color = "#FF0000";
+                    setTimeout(() => voteElement.style.color = "#FF6600", 300);
+                }
+            });
+
+            // (進階) 這裡可以寫邏輯讓卡片根據票數重新排序，但為了避免畫面一直跳動，暫時不加
+        });
+
+        // 執行初始化渲染
+        initRender();
+
+        // ==========================================
+        //  5. 投票功能 (寫入 Firebase)
+        // ==========================================
+        function submitVote(storyId) {
+            // 使用 transaction 確保多人同時點擊時票數不會算錯
+            const voteRef = db.ref('votes/' + storyId);
+            
+            voteRef.transaction((current_value) => {
+                return (current_value || 0) + 1; // 票數 +1
+            }, (error, committed, snapshot) => {
+                if (error) {
+                    console.error('投票失敗', error);
+                } else if (committed) {
+                    // 這裡可以加一些使用者的本地回饋，例如按鈕變色
+                    // alert('投票成功！'); // 為了流暢體驗，通常不跳alert
+                }
+            });
+        }
+
+        // ==========================================
+        //  6. 投稿 Modal 邏輯 (維持原樣，但加上圖片輪播)
+        // ==========================================
+        const modal = document.getElementById('submission-modal');
+        const form = document.getElementById('story-form');
+        const previewImg = document.getElementById('preview-img');
+        const demoImages = ['A1.jpg', 'A2.jpg', 'A3.jpg', 'A4.jpg', 'A5.jpg', 'A6.jpg', 'A7.jpg'];
+        let currentImgIndex = 0;
+
+        function openModal() {
+            previewImg.src = demoImages[currentImgIndex];
+            currentImgIndex = (currentImgIndex + 1) % demoImages.length;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            // 演示用：這裡暫時不寫入資料庫，只顯示成功
+            const author = document.getElementById('story-author').value.trim();
+            alert(`恭喜 @${author}！您的故事已送出 (演示模式)！`);
+            closeModal();
+        });
+
+        // 圖片預覽功能
+        document.getElementById('story-media').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if(file){
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+    </script>
+</body>
+</html>

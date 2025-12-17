@@ -1,0 +1,401 @@
+/* 基礎設定與字體 */
+:root {
+    /* 蝦皮主色 */
+    --shopee-orange: #FF6600;
+    /* 次要色 (用於背景、按鈕) */
+    --shopee-light-orange: #FFEEE5; 
+    /* 文字/背景色 */
+    --text-color: #333;
+    --background-light: #F8F8F8;
+    --white: #FFFFFF;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'PingFang TC', '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--white);
+}
+
+/* 輔助類別：主要行動按鈕樣式 */
+.cta-button, .submit-button, .vote-btn, .submit-story-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s, transform 0.2s;
+    cursor: pointer;
+    border: none;
+}
+
+.cta-button {
+    background-color: var(--shopee-orange);
+    color: var(--white);
+    font-size: 1.25rem;
+    box-shadow: 0 4px 8px rgba(255, 102, 0, 0.4);
+}
+
+.cta-button:hover {
+    background-color: #E05A00; /* 較深的橘色 */
+    transform: translateY(-2px);
+}
+
+/* ==================================== */
+/* 導覽列 (Navigation) */
+/* ==================================== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 5%;
+    background-color: var(--white);
+    border-bottom: 1px solid #eee;
+    position: sticky; /* 頂部固定 */
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .logo {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--shopee-orange);
+}
+
+.navbar nav a {
+    margin-left: 25px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.2s;
+}
+
+.navbar nav a:hover {
+    color: var(--shopee-orange);
+}
+
+/* ==================================== */
+/* 主視覺區 (Hero Section) */
+/* ==================================== */
+.hero-section {
+    background-color: var(--shopee-light-orange);
+    padding: 100px 5%;
+    text-align: center;
+    /* 使用 SVG 作為背景紋理模擬 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="50" font-size="20" text-anchor="middle" fill="%23FFEEE5" font-family="sans-serif">故事週</text></svg>');
+    background-size: 150px;
+    background-repeat: repeat;
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    color: var(--shopee-orange);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.hero-section h2 {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 40px;
+    font-weight: 300;
+}
+
+/* ==================================== */
+/* 活動玩法區 (Rules Section) */
+/* ==================================== */
+.rules-section {
+    padding: 60px 5%;
+    text-align: center;
+    background-color: var(--white);
+}
+
+.rules-section h3 {
+    font-size: 2rem;
+    color: var(--shopee-orange);
+    margin-bottom: 40px;
+}
+
+.rule-steps {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.rule-steps .step {
+    flex: 1;
+    padding: 30px;
+    background-color: var(--background-light);
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.rule-steps .step h4 {
+    font-size: 1.4rem;
+    color: var(--shopee-orange);
+    margin-bottom: 15px;
+}
+
+.rules-section .date-info {
+    font-style: italic;
+    color: #666;
+    margin-top: 20px;
+}
+
+/* ==================================== */
+/* 故事牆 (Story Wall) */
+/* ==================================== */
+.story-wall {
+    padding: 60px 5%;
+    background-color: var(--background-light);
+    text-align: center;
+}
+
+.story-wall h3 {
+    font-size: 2rem;
+    margin-bottom: 40px;
+}
+
+.story-grid {
+    display: grid;
+    /* 預設三欄，最小寬度 300px */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.story-card {
+    background-color: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    text-align: left;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.story-card:hover {
+    transform: translateY(-5px); /* 懸停時輕微上浮 */
+}
+
+.story-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.story-card h4 {
+    padding: 15px 20px 5px;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+.story-card .author {
+    padding: 0 20px 10px;
+    font-size: 0.9rem;
+    color: #999;
+}
+
+.story-card .votes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-top: 1px solid #eee;
+}
+
+.story-card .vote-count {
+    font-weight: bold;
+    color: var(--shopee-orange);
+}
+
+.story-card .vote-btn {
+    background-color: #3B5998; /* 採用社群藍色 */
+    color: var(--white);
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+.story-card .vote-btn:hover {
+    background-color: #2D4373;
+}
+
+.view-all {
+    color: var(--shopee-orange);
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* ==================================== */
+/* 行動呼籲區 (CTA Section) */
+/* ==================================== */
+.cta-section {
+    background-color: var(--shopee-orange);
+    color: var(--white);
+    padding: 80px 5%;
+    text-align: center;
+}
+
+.cta-section h3 {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+}
+
+.cta-section p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.submit-button {
+    background-color: var(--white);
+    color: var(--shopee-orange);
+    /* 覆蓋圓角，使其符合 CTA 區塊的主視覺 */
+    border-radius: 8px; 
+}
+
+.submit-button:hover {
+    background-color: var(--background-light);
+    color: #CC5500;
+}
+
+/* ==================================== */
+/* 頁尾 (Footer) */
+/* ==================================== */
+.footer {
+    padding: 20px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #666;
+    background-color: #222;
+    color: #bbb;
+}
+
+/* ==================================== */
+/* RWD 響應式設計 (Responsive Design) */
+/* ==================================== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+    }
+    .navbar nav {
+        margin-top: 10px;
+    }
+    .navbar nav a {
+        margin: 0 10px;
+    }
+
+    .hero-section {
+        padding: 60px 5%;
+    }
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    .hero-section h2 {
+        font-size: 1.2rem;
+    }
+
+    .rule-steps {
+        flex-direction: column;
+    }
+}
+
+
+/* ==================================== */
+/* 投稿浮動表單 (Modal Styles) */
+/* ==================================== */
+.modal {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    z-index: 2000; /* 確保它在最上層 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7); /* 黑色半透明背景 */
+}
+
+.modal-content {
+    background-color: var(--white);
+    margin: 10% auto; /* 垂直居中，水平置中 */
+    padding: 30px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--shopee-orange);
+    text-decoration: none;
+}
+
+/* 表單組件樣式 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.submit-story-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--shopee-orange);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-story-btn:hover {
+    background-color: #E05A00;
+}
+
+.note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 15px;
+}
+.story-card a {
+    text-decoration: none; /* 移除連結的底線 */
+    display: block;
+    cursor: pointer; /* 讓圖片看起來像可點擊的連結 */
+}
